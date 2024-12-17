@@ -1,0 +1,5 @@
+{
+    "watch": ["*.go"],
+    "ext": ".go",
+    "exec": "go run ."
+}
