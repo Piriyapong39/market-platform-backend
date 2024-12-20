@@ -55,14 +55,14 @@ func _userRegister(user User) (string, error) {
 	return "register successfully", nil
 }
 
-func _userLogin(user User) error {
+func _userLogin(user User) (string, error) {
 	// declare variable
 	userData := new(User)
 
 	//connect database
 	db, err := db.Connection()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if err := db.QueryRow(
@@ -80,13 +80,18 @@ func _userLogin(user User) error {
 		`, user.Email).
 		Scan(&userData.Email, &userData.Password, &userData.FirstName,
 			&userData.LastName, &userData.Is_seller); err != nil {
-		return err
+		return "", err
 	}
 
 	isMatch := userservices.CheckPasswordHash(user.Password, userData.Password)
 	if !isMatch {
-		return fmt.Errorf("wrong password please try again")
+		return "", fmt.Errorf("wrong password please try again")
 	}
-	fmt.Println(userData.Is_seller)
-	return nil
+
+	token, err := userservices.GenerateToken(userData.Email, userData.FirstName,
+		userData.LastName, userData.Is_seller)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }

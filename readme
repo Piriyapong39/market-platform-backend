@@ -1,5 +1,5 @@
 
 20-12-24   
     - register route        -- done
-    - login route           -- in progress
-    - service jwt           -- in progress
+    - login route           -- done
+    - jwt service           -- done

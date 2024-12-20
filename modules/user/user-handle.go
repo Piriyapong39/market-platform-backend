@@ -28,9 +28,9 @@ func userLogin(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "You are missing some fields please check again"})
 	}
 
-	err := _userLogin(*user)
+	token, err := _userLogin(*user)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	return c.Status(200).JSON(fiber.Map{"msg": "login successfully"})
+	return c.Status(200).JSON(fiber.Map{"token": token})
 }
