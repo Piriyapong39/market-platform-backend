@@ -8,5 +8,6 @@ func UserRoute(app *fiber.App) {
 	user := app.Group("/user")
 	user.Post("/register", userRegister)
 	user.Post("/login", userLogin)
+	user.Post("/authen", userAuthen)
 
 }

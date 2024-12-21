@@ -1,7 +1,11 @@
 package user
 
 import (
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
+
+	userservices "github.com/piriyapong39/market-platform/services/user-services"
 )
 
 func userRegister(c *fiber.Ctx) error {
@@ -33,4 +37,23 @@ func userLogin(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(200).JSON(fiber.Map{"token": token})
+}
+
+func userAuthen(c *fiber.Ctx) error {
+	token := c.Get("Authorization")
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "missing token"})
+	}
+	tokenPart := strings.Split(token, " ")
+	if tokenPart[0] != "Bearer" && len(tokenPart) != 2 {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "wrong format token"})
+	}
+	userData, err := userservices.VerifyToken(tokenPart[1])
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"msg":  "Authorized",
+		"user": userData,
+	})
 }
