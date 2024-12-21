@@ -57,3 +57,7 @@ func userAuthen(c *fiber.Ctx) error {
 		"user": userData,
 	})
 }
+
+func sellerAuthen(c *fiber.Ctx) error {
+	return c.SendString("Ok")
+}

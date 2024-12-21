@@ -3,5 +3,9 @@
     - register route        -- done
     - login route           -- done
     - jwt service           -- done
-    - create authen middleware      -- in progress
+    - create authen middleware      -- done
     - authen route and create service Verify token          -- done 
+
+21-12-24 
+    - Product route     -- in progress
+    - JWT must return user_id too       -- in progress
