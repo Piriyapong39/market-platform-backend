@@ -9,3 +9,4 @@
 21-12-24 
     - Product route     -- in progress
     - JWT must return user_id too       -- in progress
+    - fix bug in jwtg is_seller is aways true       -- in progress

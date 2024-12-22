@@ -13,8 +13,8 @@ func UserRoute(app *fiber.App) {
 	user.Post("/authen", userAuthen)
 
 	seller := app.Group("/seller")
-
 	seller.Use(middlewares.Authentication)
+	seller.Post("/confirm-to-seller", ConfirmToSeller)
 	seller.Use(middlewares.IsSeller)
 	seller.Post("/authen", sellerAuthen)
 }

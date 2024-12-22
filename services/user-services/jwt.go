@@ -3,6 +3,7 @@ package userservices
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -11,13 +12,14 @@ import (
 )
 
 type UserData struct {
+	Id        int    `json:"id"`
 	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Is_seller bool   `json:"is_seller"`
 }
 
-func GenerateToken(email string, firstName string, lastName string, isSeller bool) (string, error) {
+func GenerateToken(id int, email string, firstName string, lastName string, isSeller bool) (string, error) {
 
 	//import .env file
 	if err := godotenv.Load("./config/.env"); err != nil {
@@ -27,6 +29,7 @@ func GenerateToken(email string, firstName string, lastName string, isSeller boo
 
 	// Create the Claims
 	claims := jwt.MapClaims{
+		"id":        id,
 		"email":     email,
 		"firstName": firstName,
 		"lastName":  lastName,
@@ -50,25 +53,40 @@ func VerifyToken(tokenString string) (UserData, error) {
 	if err := godotenv.Load("./config/.env"); err != nil {
 		return UserData{}, err
 	}
-	JWT_SECRET_KEY := []byte(os.Getenv("JWT_SECRET_KEY"))
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return JWT_SECRET_KEY, nil
+
+	tokenPart := strings.Split(tokenString, " ")
+	if len(tokenPart) != 2 || tokenPart[0] != "Bearer" {
+		return UserData{}, fmt.Errorf("invalid token")
+	}
+
+	token, err := jwt.Parse(tokenPart[1], func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
 	})
+
 	if err != nil || !token.Valid {
 		return UserData{}, fmt.Errorf("invalid token: %v", err)
 	}
+
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return UserData{}, fmt.Errorf("invalid claims")
 	}
-	userData := UserData{
-		Email:     claims["email"].(string),
-		FirstName: claims["firstName"].(string),
-		LastName:  claims["lastName"].(string),
-		Is_seller: claims["isSeller"].(bool),
+
+	id, ok1 := claims["id"].(float64)
+	email, ok2 := claims["email"].(string)
+	firstName, ok3 := claims["firstName"].(string)
+	lastName, ok4 := claims["lastName"].(string)
+	isSeller, ok5 := claims["isSeller"].(bool)
+
+	if !(ok1 && ok2 && ok3 && ok4 && ok5) {
+		return UserData{}, fmt.Errorf("invalid claim values")
 	}
-	return userData, nil
+	fmt.Println(isSeller)
+	return UserData{
+		Id:        int(id),
+		Email:     email,
+		FirstName: firstName,
+		LastName:  lastName,
+		Is_seller: isSeller,
+	}, nil
 }

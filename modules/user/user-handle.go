@@ -1,8 +1,6 @@
 package user
 
 import (
-	"strings"
-
 	"github.com/gofiber/fiber/v2"
 
 	userservices "github.com/piriyapong39/market-platform/services/user-services"
@@ -41,14 +39,7 @@ func userLogin(c *fiber.Ctx) error {
 
 func userAuthen(c *fiber.Ctx) error {
 	token := c.Get("Authorization")
-	if token == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "missing token"})
-	}
-	tokenPart := strings.Split(token, " ")
-	if tokenPart[0] != "Bearer" && len(tokenPart) != 2 {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "wrong format token"})
-	}
-	userData, err := userservices.VerifyToken(tokenPart[1])
+	userData, err := userservices.VerifyToken(token)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -58,6 +49,19 @@ func userAuthen(c *fiber.Ctx) error {
 	})
 }
 
+func ConfirmToSeller(c *fiber.Ctx) error {
+	token := c.Get("Authorization")
+	result, err := _confirmToSeller(token)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"msg": result,
+	})
+}
+
 func sellerAuthen(c *fiber.Ctx) error {
-	return c.SendString("Ok")
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"msg": "able to access this function",
+	})
 }

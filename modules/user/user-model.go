@@ -11,6 +11,7 @@ import (
 )
 
 type User struct {
+	Id        int    `json:"id"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 	FirstName string `json:"first_name"`
@@ -68,6 +69,7 @@ func _userLogin(user User) (string, error) {
 	if err := db.QueryRow(
 		`
 			SELECT 
+				id,
 				email,
 				password,
 				first_name,
@@ -78,7 +80,7 @@ func _userLogin(user User) (string, error) {
 			WHERE 1=1
 				AND email=$1
 		`, user.Email).
-		Scan(&userData.Email, &userData.Password, &userData.FirstName,
+		Scan(&userData.Id, &userData.Email, &userData.Password, &userData.FirstName,
 			&userData.LastName, &userData.Is_seller); err != nil {
 		return "", err
 	}
@@ -88,10 +90,46 @@ func _userLogin(user User) (string, error) {
 		return "", fmt.Errorf("wrong password please try again")
 	}
 
-	token, err := userservices.GenerateToken(userData.Email, userData.FirstName,
+	token, err := userservices.GenerateToken(userData.Id, userData.Email, userData.FirstName,
 		userData.LastName, userData.Is_seller)
 	if err != nil {
 		return "", err
 	}
 	return token, nil
+}
+
+func _confirmToSeller(token string) (string, error) {
+	//connect database
+	db, err := db.Connection()
+	if err != nil {
+		return "", err
+	}
+	//verify token
+	userData, err := userservices.VerifyToken(token)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println(userData)
+	if userData.Is_seller {
+		return "", fmt.Errorf("you are already a seller")
+	}
+	//update user to seller
+	result, err := db.Exec(`
+		UPDATE tb_users
+		SET is_seller = true
+		WHERE 1=1
+			AND id = $1
+			AND is_seller = $2
+	`, userData.Id, userData.Is_seller)
+	if err != nil {
+		return "", err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return "", err
+	}
+	if affected == 0 {
+		return "", fmt.Errorf("you are already a seller")
+	}
+	return "confirm to seller successfully", nil
 }
