@@ -10,3 +10,9 @@
     - Product route     -- in progress
     - JWT must return user_id too       -- done
     - fix bug in jwtg is_seller is aways true       -- done
+
+24-12-24
+    - create table product      -- done
+    - create table category     -- done
+    
+

@@ -61,7 +61,12 @@ func ConfirmToSeller(c *fiber.Ctx) error {
 }
 
 func sellerAuthen(c *fiber.Ctx) error {
+	token := c.Get("Authorization")
+	result, err := userservices.VerifyToken(token)
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
-		"msg": "able to access this function",
+		"user": result,
 	})
 }
