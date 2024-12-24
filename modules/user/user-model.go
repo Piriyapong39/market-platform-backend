@@ -104,12 +104,12 @@ func _confirmToSeller(token string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// user := new(User)
 	//verify token
 	userData, err := userservices.VerifyToken(token)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(userData)
 	if userData.Is_seller {
 		return "", fmt.Errorf("you are already a seller")
 	}
@@ -131,5 +131,9 @@ func _confirmToSeller(token string) (string, error) {
 	if affected == 0 {
 		return "", fmt.Errorf("you are already a seller")
 	}
-	return "confirm to seller successfully", nil
+	newToken, err := userservices.GenerateToken(userData.Id, userData.Email, userData.FirstName, userData.LastName, true)
+	if err != nil {
+		return "", err
+	}
+	return newToken, nil
 }

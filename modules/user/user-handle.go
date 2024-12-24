@@ -56,7 +56,7 @@ func ConfirmToSeller(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
-		"msg": result,
+		"token": result,
 	})
 }
 

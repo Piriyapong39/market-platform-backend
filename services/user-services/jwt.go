@@ -81,7 +81,7 @@ func VerifyToken(tokenString string) (UserData, error) {
 	if !(ok1 && ok2 && ok3 && ok4 && ok5) {
 		return UserData{}, fmt.Errorf("invalid claim values")
 	}
-	fmt.Println(isSeller)
+	// fmt.Println(isSeller)
 	return UserData{
 		Id:        int(id),
 		Email:     email,
