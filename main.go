@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 
 	// import route
+	"github.com/piriyapong39/market-platform/modules/product"
 	"github.com/piriyapong39/market-platform/modules/user"
 )
 
@@ -28,6 +29,7 @@ func main() {
 
 	// active routes
 	user.UserRoute(app)
+	product.ProductRoute(app)
 
 	// start server on port
 	if err := app.Listen(":" + port); err != nil {

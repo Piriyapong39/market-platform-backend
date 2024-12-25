@@ -1,18 +1,21 @@
 
 20-12-24   
-    - register route        -- done
-    - login route           -- done
-    - jwt service           -- done
+    - register route                -- done
+    - login route                   -- done
+    - jwt service                   -- done
     - create authen middleware      -- done
     - authen route and create service Verify token          -- done 
 
 21-12-24 
-    - Product route     -- in progress
-    - JWT must return user_id too       -- done
+    - Product route                                 -- in progress
+    - JWT must return user_id too                   -- done
     - fix bug in jwtg is_seller is aways true       -- done
 
 24-12-24
-    - create table product      -- done
-    - create table category     -- done
-    
+    - create table product                              -- done
+    - create table category                             -- done
+    - create product_id using function in postgresql    -- done
 
+25-12-24
+    - In route product, create product => request go with form-data     -- in progress
+    - Insert picture and create folder for picture                      -- in progress
