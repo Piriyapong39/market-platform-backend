@@ -17,7 +17,11 @@
     - create product_id using function in postgresql    -- done
 
 25-12-24
-    - In route product, create product => request go with form-data     -- in progress
+    - In route product, create product => request go with form-data     -- done
     - Insert picture and create folder for picture                      -- in progress
     - Insert data into database first               -- in progress
+
+27-12-24
+    - path of picture /upload/product-pictures/ datetime (24-12-27) /category_id / product_id / picture_name        -- in progress
+    - Save file in upload => product-pictures
     

@@ -89,7 +89,7 @@ func createProduct(c *fiber.Ctx) error {
 	}
 	if intStock < 1 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Stock must >= 1",
+			"error": "Stock value must more than 1",
 		})
 	}
 
@@ -128,13 +128,15 @@ func createProduct(c *fiber.Ctx) error {
 	}
 
 	// Create product
-	results, err := _createProduct(*productRequest)
+	picturesNameArr, err := _createProduct(*productRequest)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
+
+	// Create picture
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"msg": results,
+		"msg": picturesNameArr,
 	})
 }
