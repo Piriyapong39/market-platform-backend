@@ -19,23 +19,35 @@ type Product struct {
 }
 
 func _createProduct(product Product) (string, error) {
-
 	db, err := db.Connection()
 	if err != nil {
 		return "", err
 	}
 	defer db.Close()
 
-	fmt.Println(product.PicPath)
+	var outProductID string
+	var outProductPicPath string
 	picPaths := pq.Array(product.PicPath)
-	result, err := db.Exec(`
-        CALL sp_create_product($1, $2, $3, $4, $5, $6, $7)
-    `, product.Name, product.Description, product.Stock,
-		product.Price, product.CategoryID, product.User_id, picPaths)
+
+	query := `CALL sp_create_product($1, $2, $3, $4, $5, $6, $7, $8);`
+	row := db.QueryRow(
+		query,
+		product.Name,
+		product.Description,
+		product.Stock,
+		product.Price,
+		product.CategoryID,
+		product.User_id,
+		picPaths,
+		nil,
+	)
+
+	err = row.Scan(&outProductPicPath, &outProductID)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get product ID: %v", err)
 	}
 
-	fmt.Println(result)
-	return "result", nil
+	// var picPathsArr []string
+
+	return outProductID, nil
 }

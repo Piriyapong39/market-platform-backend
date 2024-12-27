@@ -14,6 +14,5 @@ func ProductRoute(app *fiber.App) {
 
 	product.Use(middlewares.Authentication)
 	product.Use(middlewares.IsSeller)
-	product.Post("/create", createProduct)
-
+	product.Post("/create-product", createProduct)
 }

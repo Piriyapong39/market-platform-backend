@@ -19,3 +19,5 @@
 25-12-24
     - In route product, create product => request go with form-data     -- in progress
     - Insert picture and create folder for picture                      -- in progress
+    - Insert data into database first               -- in progress
+    

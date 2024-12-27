@@ -1,7 +1,13 @@
 package product
 
 import (
+	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 
 	// import service
 
@@ -9,7 +15,12 @@ import (
 )
 
 func createProduct(c *fiber.Ctx) error {
-	productRequest := new(Product)
+
+	// declare main variable
+	newPictureName := uuid.New()
+	var picFilesArr []string
+
+	// verify identity
 	token := c.Get("Authorization")
 	userData, err := userservices.VerifyToken(token)
 	if err != nil {
@@ -17,30 +28,113 @@ func createProduct(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-	productRequest.User_id = userData.Id
-	if err := c.BodyParser(&productRequest); err != nil {
+
+	// request from form-data
+	form, err := c.MultipartForm()
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	// main picture
+	picMain := form.File["main_image"]
+	if len(picMain) != 1 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
+			"error": "only 1 main picture",
 		})
 	}
-	if productRequest.Name == "" || productRequest.Description == "" || productRequest.Stock == 0 || productRequest.Price == 0 || productRequest.CategoryID == 0 {
+	mainPicName := strings.Split(picMain[0].Filename, ".")
+	fileExtension := mainPicName[len(mainPicName)-1]
+	if fileExtension != "jpg" && fileExtension != "png" && fileExtension != "jpeg" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Missing required fields",
+			"error": "Invalid main picture format. Only jpg, png, and jpeg are allowed.",
 		})
 	}
-	if len(productRequest.PicPath) > 5 {
+	mainPicNameFormatted := fmt.Sprintf("main.%s", fileExtension)
+	picFilesArr = append(picFilesArr, mainPicNameFormatted)
+
+	// picture files
+	picFiles := form.File["images"]
+	if len(picFiles) == 0 || len(picFiles) > 4 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Maximum 5 images are allowed",
+			"error": "Invalid number of files",
 		})
 	}
-	result, err := _createProduct(*productRequest)
+	for _, file := range picFiles {
+		re := regexp.MustCompile(`\s+`)
+		joinName := re.ReplaceAllString(file.Filename, "")
+		splitName := strings.Split(joinName, ".")
+		extFile := splitName[len(splitName)-1]
+		if extFile != "png" && extFile != "jpeg" && extFile != "jpg" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid picture format. Only jpg, png, and jpeg are allowed.",
+			})
+		}
+		file.Filename = fmt.Sprintf("%s.%s", newPictureName.String(), extFile)
+		picFilesArr = append(picFilesArr, file.Filename)
+	}
+
+	// product name
+	productName := form.Value["name"]
+
+	// product description
+	productDescription := form.Value["description"]
+
+	// product stock
+	productStock := form.Value["stock"]
+	intStock, err := strconv.Atoi(productStock[0])
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid stock value",
+		})
+	}
+	if intStock < 1 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Stock must >= 1",
+		})
+	}
+
+	// product price
+	productPrice := form.Value["price"]
+	floatPrice, err := strconv.ParseFloat(productPrice[0], 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid price value",
+		})
+	}
+	if floatPrice < 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Product price must more than 0",
+		})
+	}
+
+	// product category
+	productCategoryID := form.Value["category_id"]
+	intCategoryID, err := strconv.Atoi(productCategoryID[0])
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid category ID",
+		})
+	}
+
+	// Set product request data using struct initialization
+	productRequest := &Product{
+		Name:        productName[0],
+		Description: productDescription[0],
+		Stock:       intStock,
+		Price:       floatPrice,
+		CategoryID:  intCategoryID,
+		PicPath:     picFilesArr,
+		User_id:     userData.Id,
+	}
+
+	// Create product
+	results, err := _createProduct(*productRequest)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
-	return c.JSON(fiber.Map{
-		"message": "Product created successfully",
-		"data":    result,
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"msg": results,
 	})
 }
