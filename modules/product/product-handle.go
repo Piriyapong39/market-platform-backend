@@ -42,6 +42,7 @@ func createProduct(c *fiber.Ctx) error {
 			"error": "only 1 main picture",
 		})
 	}
+	// fmt.Println(picMain)
 	mainPicName := strings.Split(picMain[0].Filename, ".")
 	fileExtension := mainPicName[len(mainPicName)-1]
 	if fileExtension != "jpg" && fileExtension != "png" && fileExtension != "jpeg" {
@@ -134,6 +135,24 @@ func createProduct(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+
+	// create folder and upload files
+
+	mainnnPic, err := c.FormFile("main_image")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	fmt.Println(mainnnPic)
+
+	// result, err := productService.SavePictureFiles([]*multipart.FileHeader{picMain})
+	// if err != nil {
+	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	// 		"error": err,
+	// 	})
+	// }
+	// fmt.Println(result)
 
 	// Create picture
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{

@@ -25,3 +25,6 @@
     - path of picture /upload/product-pictures/ datetime (24-12-27) /category_id / product_id / picture_name        -- in progress
     - Save file in upload => product-pictures
     
+
+6-1-24
+    - func createProduct use c.FormFile('key')      -- in progress
